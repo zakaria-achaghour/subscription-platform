@@ -18,4 +18,9 @@ class Post extends Model
     {
         return $this->belongsTo(Website::class);
     }
+
+    public function emailLogs()
+    {
+        return $this->hasMany(EmailLog::class);
+    }
 }
