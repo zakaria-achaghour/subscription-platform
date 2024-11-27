@@ -10,6 +10,8 @@ class Subscription extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $fillable = ['email'];
+
      /**
      * Get the website that owns the subscription.
      */
