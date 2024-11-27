@@ -116,3 +116,12 @@ Subscribe to Website: POST /api/websites/{websiteId}/subscriptions
 View Subscription: GET /api/subscriptions/{id}
 
 Delete Subscription: DELETE /api/subscriptions/{id}
+
+
+
+# to access to phpmyadmin 
+##  localhost:8080
+`username: root
+password: root`
+
+![image](https://github.com/user-attachments/assets/89851e42-be3b-4c9d-bbd4-9da2fbe01248)
