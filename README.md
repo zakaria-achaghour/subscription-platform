@@ -113,6 +113,16 @@ List Subscriptions: GET /api/subscriptions
 
 Subscribe to Website: POST /api/websites/{websiteId}/subscriptions
 
+`
+curl --request POST \
+  --url http://localhost:80/api/websites/1/subscriptions \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: Insomnia/2023.5.7' \
+  --data '{
+	"email":"achaghourzakaria@gmail.com"
+}'
+`
+
 View Subscription: GET /api/subscriptions/{id}
 
 Delete Subscription: DELETE /api/subscriptions/{id}
