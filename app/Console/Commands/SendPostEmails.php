@@ -28,35 +28,32 @@ class SendPostEmails extends Command
      */
     public function handle()
     {
-        $websites = Website::with(['posts', 'subscriptions'])->get();
+        Website::chunk(100, function ($websites) {
+            foreach ($websites as $website) {
+                $website->posts()->chunk(100, function ($posts) use ($website) {
+                    foreach ($posts as $post) {
+                        $website->subscriptions()->chunk(100, function ($subscriptions) use ($post) {
+                            foreach ($subscriptions as $subscription) {
+                                $alreadyEmailed = EmailLog::where('post_id', $post->id)
+                                    ->where('subscription_id', $subscription->id)
+                                    ->exists();
 
-        foreach ($websites as $website) {
-            $posts = $website->posts;
-            $subscriptions = $website->subscriptions;
-        
-            if ($posts->isEmpty() || $subscriptions->isEmpty()) {
-                continue;
-            }
-            
-            foreach ($posts as $post) {
-                foreach ($subscriptions as $subscription) {
-                    $alreadyEmailed = EmailLog::where('post_id', $post->id)
-                                              ->where('subscription_id', $subscription->id)
-                                              ->exists();
-                    if (!$alreadyEmailed) {
-                        Mail::to($subscription->email)->send(new \App\Mail\PostNotification($post));
-                            EmailLog::create([
-                                'post_id' => $post->id,
-                                'subscription_id' => $subscription->id,
-                            ]);
+                                if (!$alreadyEmailed) {
+                                    Mail::to($subscription->email)->queue(new \App\Mail\PostNotification($post));
+
+                                    EmailLog::create([
+                                        'post_id' => $post->id,
+                                        'subscription_id' => $subscription->id,
+                                    ]);
+                                }
+                            }
+                        });
                     }
-                }
+                });
             }
-        }
+        });
     
         $this->info('Emails sent successfully.');
         return Command::SUCCESS;
-                        
-            
     }
 }

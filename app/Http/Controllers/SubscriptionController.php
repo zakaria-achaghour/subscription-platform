@@ -37,21 +37,34 @@ class SubscriptionController extends Controller
      */
     public function store(Request $request, $websiteId)
     {
-        $website = Website::findOrFail($websiteId);
         try {
-            $request->validate([
-                'email' => 'required|email|unique:subscriptions,email,NULL,id,website_id,' . $websiteId,
-            ]);
-        
-            $subscription = $website->subscriptions()->create($request->only('email'));
-        
-            return response()->json($subscription, 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Errors',
-                'errors' => $e->errors(),
-            ], 400);
-        }
+                $website = Website::findOrFail($websiteId);
+                $request->validate([
+                    'email' => 'required|email',
+                ]);
+    
+                $exists = Subscription::where('email', $request->email)
+                    ->where('website_id', $websiteId)
+                    ->exists();
+    
+                if ($exists) {
+                    return response()->json(['error' => 'This email is already subscribed to this website.'], 422);
+                }
+    
+                $subscription = $website->subscriptions()->create($request->only('email'));
+    
+                return response()->json($subscription, 201);
+            } catch (ValidationException $e) {
+                return response()->json([
+                    'message' => 'Validation Errors',
+                    'errors' => $e->errors(),
+                ], 422);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'An unexpected error occurred.',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
     }
 
     /**
